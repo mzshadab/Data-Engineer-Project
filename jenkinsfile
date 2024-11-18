@@ -1,0 +1,35 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Clone Repository') {
+            steps {
+                echo 'Cloning Git repository...'
+                git 'https://github.com/mzshadab/Data-Engineer-Project.git'
+            }
+        }
+        stage('Test Airflow DAGs') {
+            steps {
+                echo 'Testing Airflow DAGs...'
+                // Verifies the DAG is listed and valid in Airflow
+                sh 'airflow dags list | grep retail_data_pipeline'
+            }
+        }
+        stage('Trigger DAG Execution') {
+            steps {
+                echo 'Triggering Airflow DAG...'
+                // Triggers the DAG execution
+                sh 'airflow dags trigger -d retail_data_pipeline'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline executed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed. Please check the logs.'
+        }
+    }
+}
